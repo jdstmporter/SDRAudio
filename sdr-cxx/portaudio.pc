@@ -1,0 +1,15 @@
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: portaudio
+Description: DSP library for SDR.
+URL: clone https://github.com/PortAudio/portaudio
+Version: 3.0.0
+Requires:
+Requires.private:
+Conflicts:
+Cflags: -I${includedir}
+Libs: -L${libdir} -lportaudio
+Libs.private:

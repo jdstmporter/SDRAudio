@@ -13,7 +13,7 @@ compilerInfo = $(shell pkg-config --$1 $2)
 libInfo = $(call compilerInfo,libs,$1)
 hdrInfo = $(call compilerInfo,cflags,$1)
 
-LIBS := SoapySDR liquid
+LIBS := SoapySDR liquid sndfile portaudio
 HDR_INFO := $(call hdrInfo,$(LIBS))
 LIB_INFO := $(call libInfo,$(LIBS))
 
