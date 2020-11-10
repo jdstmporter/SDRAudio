@@ -13,6 +13,7 @@
 #include <sstream>
 #include <exception>
 #include <complex>
+#include <vector>
 
 
 namespace wav {
@@ -66,7 +67,7 @@ public:
 
 
 
-	WAVFile(const std::string &path,const Mode &mode = Mode::READ_ONLY,
+	WAVFile(const std::string &path,const Mode &mode = Mode::WRITE_ONLY,
 			const Format &format = Format::REAL, const int sampleRate = 48000,
 			const unsigned bufferSize = 32);
 	virtual ~WAVFile() ;
@@ -78,6 +79,7 @@ public:
 	size_t read(cx_t *buffer);
 
 	void write(float *begin,float *end);
+	void write(const std::vector<float> &);
 	void write(cx_t *begin,cx_t *end);
 	void flush();
 

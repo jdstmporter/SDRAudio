@@ -45,6 +45,10 @@ void WAVFile::write(float *begin,float *end) {
 	handle.writef(begin,n);
 	check();
 }
+void WAVFile::write(const std::vector<float> &vec) {
+	handle.writef(vec.data(),(unsigned long long)vec.size());
+	check();
+}
 
 void WAVFile::write(cx_t *begin,cx_t *end) {
 	auto n = std::min<size_t>(bufferSize,(size_t)(end-begin));

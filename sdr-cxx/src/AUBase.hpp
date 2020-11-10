@@ -17,6 +17,7 @@
 namespace audio {
 
 using time_t = PaTime;
+using flags_t = PaStreamCallbackFlags;
 
 class AUError : public std::exception {
 public:

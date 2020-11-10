@@ -6,6 +6,7 @@
  */
 
 #include "AUStream.hpp"
+#include <algorithm>
 
 namespace audio {
 
@@ -15,28 +16,27 @@ unsigned long AUStreamParameters::sampleSize() const {
 	return (unsigned long)sampleSize;
 }
 
+AUStreamParameters::params_t AUStreamParameters::streamParameters(const AUDevice &d) const {
+		PaStreamParameters p;
+		bzero(&p,sizeof(p));
+		p.channelCount=nChannels;
+		p.device=d.index();
+		p.hostApiSpecificStreamInfo=NULL;
+		p.sampleFormat=sampleFormat();
+		p.suggestedLatency = d.latencyOut();
+		p.hostApiSpecificStreamInfo=NULL;
+		return p;
+	}
 
 
 
-AUStream::AUStream(const AUDevice &device,const AUStreamParameters &params) : active(false) {
 
-	PaStreamParameters p;
-	bzero(&p,sizeof(p));
-	p.channelCount=params.nChannels;
-	p.device=device.index();
-	p.hostApiSpecificStreamInfo=NULL;
-	p.sampleFormat=params.sampleFormat();
-	p.suggestedLatency = device.latencyOut();
-	p.hostApiSpecificStreamInfo=NULL;
+AUStreamBase::AUStreamBase(const AUDevice &device_,const AUStreamParameters &params_)
+: active(false), bufferSize(params.bufferSize), stream(nullptr), params(params_), device(device_) {
 	fpb = params.bufferSize/params.nChannels;
-
-	PaStream *stream_;
-	AUError::check(Pa_OpenStream(&stream_,nullptr,&p,params.rate,fpb,paNoFlag,nullptr,nullptr));
-	stream=stream_;
 }
-AUStream::AUStream(const AUStreamParameters &params) : AUStream(AUDevice(),params) {}
 
-AUStream::~AUStream() {
+AUStreamBase::~AUStreamBase() {
 	if(stream!=nullptr) {
 		try {
 			Pa_CloseStream(stream);
@@ -46,31 +46,80 @@ AUStream::~AUStream() {
 	}
 }
 
-void AUStream::start() {
+void AUStreamBase::open() {
+	PaStream *stream_;
+	PaStreamParameters p=params.streamParameters(device);
+	AUError::check(Pa_OpenStream(&stream_,nullptr,&p,params.rate,fpb,paNoFlag,nullptr,nullptr));
+	stream=stream_;
+}
+
+void AUStreamBase::start() {
 	if(!active) {
 		AUError::check(Pa_StartStream(stream));
 		active=true;
 	}
 }
 
-void AUStream::stop() {
+void AUStreamBase::stop() {
 	if(active) {
 		active=false;
 		AUError::check(Pa_StopStream(stream));
 	}
 }
 
-void AUStream::forceStop() {
+void AUStreamBase::forceStop() {
 	if(active) {
 		active=false;
 		AUError::check(Pa_AbortStream(stream));
 	}
 }
 
-void AUStream::write(float *buffer) {
+void AUStream::write(const std::vector<float> &vec) {
 	if(active) {
-		AUError::check(Pa_WriteStream(stream,buffer,fpb));
+		AUError::check(Pa_WriteStream(stream,vec.data(),vec.size()));
 	}
 }
+
+static int nonBlockingCallback(const void *inputBuffer, void *outputBuffer,
+        unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo* timeInfo,
+        PaStreamCallbackFlags statusFlags,void *userData) {
+	auto me = (AUNonBlockingStream *)userData;
+	me->getNextBlock(outputBuffer,framesPerBuffer);
+	return 0;
+}
+
+void AUNonBlockingStream::open() {
+	PaStream *stream_;
+	PaStreamParameters p=params.streamParameters(device);
+	AUError::check(Pa_OpenStream(&stream_,nullptr,&p,params.rate,fpb,paNoFlag,nonBlockingCallback,(void *)this));
+	stream=stream_;
+}
+
+void AUNonBlockingStream::getNextBlock(void *outputBuffer,unsigned long framesPerBuffer) {
+	lock.lock();
+	try {
+		float *out = (float *)outputBuffer;
+		if(watermark>=framesPerBuffer) {
+			std::copy(buffer.begin(),buffer.end(),out);
+			watermark=0;
+		}
+	}
+	catch(...) {}
+	lock.unlock();
+}
+
+void AUNonBlockingStream::write(const std::vector<float> &vec) {
+	if(active) {
+		lock.lock();
+		try {
+			std::copy(vec.begin(),vec.end(),buffer.begin()+watermark);
+			watermark+=vec.size();
+		}
+		catch(...) {}
+		lock.unlock();
+	}
+}
+
+
 
 } /* namespace audio */
