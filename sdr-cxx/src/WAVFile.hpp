@@ -26,8 +26,8 @@ private:
 public:
 	WAVFileError(const int code_ = 0,const std::string &message_ = "") :
 		std::exception(), code(code_), message(message_) {}
-	WAVFileError(const SndfileHandle &handle) :
-		WAVFileError(handle.error(),handle.strError()) {};
+	WAVFileError(SNDFILE *handle) :
+		WAVFileError(sf_error(handle),sf_strerror(handle)) {};
 	WAVFileError(const WAVFileError &) = default;
 	virtual ~WAVFileError() = default;
 
@@ -48,14 +48,9 @@ public:
 		WRITE_ONLY = SFM_WRITE,
 		READ_WRITE = SFM_RDWR
 	};
-	enum class Format {
-		REAL,
-		COMPLEX
-	};
 private:
-	SndfileHandle handle;
-	size_t bufferSize;
-	float *buffer;
+	unsigned nChannels;
+	SNDFILE *handle;
 
 
 	void check() {
@@ -63,25 +58,24 @@ private:
 		auto e = WAVFileError(handle);
 		if(e) throw e;
 	}
+	size_t size2Frames(unsigned n) const { return (size_t)(n/nChannels); }
 public:
 
 
 
-	WAVFile(const std::string &path,const Mode &mode = Mode::WRITE_ONLY,
-			const Format &format = Format::REAL, const int sampleRate = 48000,
-			const unsigned bufferSize = 32);
+	WAVFile(const std::string &path,
+			const Mode &mode = Mode::WRITE_ONLY,
+			const int sampleRate = 48000,
+			const unsigned nChannels = 2);
 	virtual ~WAVFile() ;
 
 	operator bool () const { return handle; }
 
 
-	size_t read(float *buffer);
-	size_t read(cx_t *buffer);
+	size_t read(float *buffer,const unsigned n);
 
 	void write(float *begin,float *end);
 	void write(const std::vector<float> &);
-	void write(cx_t *begin,cx_t *end);
-	void flush();
 
 
 

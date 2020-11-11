@@ -13,6 +13,7 @@
 #include <iostream>
 #include <exception>
 #include <vector>
+#include <algorithm>
 
 namespace audio {
 

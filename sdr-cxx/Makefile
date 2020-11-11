@@ -21,7 +21,7 @@ CFILES := $(shell ls -1 $(SRCDIR)/*.cpp)
 
 
 
-CPPFLAGS := -Wall -g -Os -pthread -I$(SRCDIR) -I.
+CPPFLAGS := -Wall -g -O3 -pthread -I$(SRCDIR) -I.
 CXXFLAGS := -std=c++17 -c -fmessage-length=0 -fPIC $(HDR_INFO)
 LDFLAGS := $(LIB_INFO)
 

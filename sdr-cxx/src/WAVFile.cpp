@@ -10,58 +10,50 @@
 
 namespace wav {
 
-WAVFile::WAVFile(const std::string &path_,const Mode &mode_,const Format &format,
-		const int sampleRate_, const unsigned bufferSize_)  {
-		int n = (format == Format::REAL) ? 1 : 2;
-		bufferSize=(size_t)(bufferSize_*n);
-		buffer = new float[bufferSize];
-		handle = SndfileHandle(path_,static_cast<int>(mode_),
-						               SF_FORMAT_WAV | SF_FORMAT_FLOAT,n,sampleRate_);
+WAVFile::WAVFile(const std::string &path_,const Mode &mode_,
+		const int sampleRate_, const unsigned nChannels_) :
+			nChannels(nChannels_) {
+
+		SF_INFO info;
+		info.samplerate = sampleRate_;
+		info.channels = (int)nChannels;
+		info.format = SF_FORMAT_WAV | SF_FORMAT_FLOAT;
+
+		if(!sf_format_check(&info)) {
+			throw  WAVFileError(0,"Bad sound file format specifier");
+		}
+
+		handle = sf_open(path_.c_str(),static_cast<int>(mode_),&info);
 		check();
 }
 
 WAVFile::~WAVFile() {
-	if(handle) flush();
-	delete [] buffer;
-}
-
-WAVFile::size_t WAVFile::read(float *buffer) {
-	auto out=handle.readf(buffer,bufferSize);
-	check();
-	return out;
-}
-
-WAVFile::size_t WAVFile::read(cx_t *cbuffer) {
-	auto out=handle.readf(buffer,(size_t)bufferSize)/2;
-	check();
-	for(auto i=0;i<out;i++) {
-		cbuffer[i]=cx_t(buffer[2*i],buffer[2*i+1]);
+	if(handle) {
+		sf_write_sync(handle);
+		sf_close(handle);
+		handle=nullptr;
 	}
+}
+
+WAVFile::size_t WAVFile::read(float *buffer,const unsigned n) {
+	auto out=sf_readf_float(handle,buffer,n);
+	check();
 	return out;
 }
+
+
 
 void WAVFile::write(float *begin,float *end) {
-	auto n = (size_t)(end-begin);
-	handle.writef(begin,n);
+	sf_writef_float(handle,begin,size2Frames(end-begin));
 	check();
 }
 void WAVFile::write(const std::vector<float> &vec) {
-	handle.writef(vec.data(),(unsigned long long)vec.size());
+	sf_writef_float(handle,vec.data(),size2Frames(vec.size()));
 	check();
 }
 
-void WAVFile::write(cx_t *begin,cx_t *end) {
-	auto n = std::min<size_t>(bufferSize,(size_t)(end-begin));
-	for(size_t i=0;i<n;i++) {
-		auto c = *(begin+i);
-		buffer[2*i]=c.real();
-		buffer[2*i+1] = c.imag();
-	}
-	handle.writef(buffer,2*n);
-	check();
-}
 
-void WAVFile::flush() { handle.writeSync(); }
+
 
 
 

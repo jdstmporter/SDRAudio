@@ -27,7 +27,7 @@ public:
 	using iterator = std::vector<unsigned>::iterator;
 	using const_iterator = std::vector<unsigned>::const_iterator;
 
-	SDRFlags(const unsigned flags_=0);
+	SDRFlags(const int flags_=0);
 	virtual ~SDRFlags() = default;
 	SDRFlags(const SDRFlags &other) = default;
 	SDRFlags(SDRFlags &&other) = default;

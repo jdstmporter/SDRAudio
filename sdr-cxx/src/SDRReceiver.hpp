@@ -31,7 +31,7 @@ struct SDRData {
 	long long timestamp;
 	unsigned n;
 
-	SDRData(cx_t *b,const unsigned n_,const unsigned flags_,const long long ns) :
+	SDRData(cx_t *b,const unsigned n_,const int flags_,const long long ns) :
 		buffer(b), flags(SDRFlags(flags_)), timestamp(ns), n(n_) {}
 	virtual ~SDRData() = default;
 	SDRData(const SDRData &) = default;
@@ -50,11 +50,11 @@ struct SDRData {
 
 class SDRReceiver {
 private:
-	const static unsigned long DECIMATION_FACTOR;
-	const static float AUDIO_RATE;
+
+
 	const static float RF_RATE;
 	const static unsigned long DECIMATOR_LENGTH;
-	const static unsigned long AUDIO_BLOCK_SIZE;
+
 	const static unsigned long RF_BLOCK_SIZE;
 	unsigned channel;
 	float bandwidth;
@@ -69,6 +69,9 @@ private:
 
 	void update();
 public:
+	const static unsigned long AUDIO_BLOCK_SIZE;
+	const static float AUDIO_RATE;
+	const static unsigned long DECIMATION_FACTOR;
 
 	SDRReceiver(const unsigned channel_=0,
 			    const float frequency_=433.0e6,

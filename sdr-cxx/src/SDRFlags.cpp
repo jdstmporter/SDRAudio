@@ -22,7 +22,7 @@ const std::map<unsigned,std::string> SDRFlags::flagNames ({
 		_p(SOAPY_SDR_WAIT_TRIGGER, "Wait for external trigger")
 });
 
-SDRFlags::SDRFlags(const unsigned flags_) : flag(flags_), flags()  {
+SDRFlags::SDRFlags(const int flags_) : flag(flags_), flags()  {
 	unsigned matched=0;
 	for(auto it = flagNames.begin();it!=flagNames.end();it++) {
 		auto f = it->first;
