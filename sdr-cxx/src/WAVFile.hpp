@@ -64,9 +64,9 @@ public:
 
 
 	WAVFile(const std::string &path,
-			const Mode &mode = Mode::WRITE_ONLY,
-			const int sampleRate = 48000,
-			const unsigned nChannels = 2);
+			const Mode &mode,
+			const int sampleRate,
+			const unsigned nChannels);
 	virtual ~WAVFile() ;
 
 	operator bool () const { return handle; }

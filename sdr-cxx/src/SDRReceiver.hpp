@@ -10,7 +10,7 @@
 
 #include "base.hpp"
 #include <SoapySDR/Device.hpp>
-#include <liquid/liquid.h>
+
 #include "SDRFlags.hpp"
 #include "SDRError.hpp"
 #include "SDRDecimator.hpp"
@@ -18,7 +18,7 @@
 namespace sdr {
 
 using cx_t = std::complex<float>;
-using lcx_t = liquid_float_complex;
+
 
 
 
@@ -45,6 +45,10 @@ struct SDRData {
 	const_iterator cend() const { return buffer+n; }
 
 	unsigned size() const { return n; }
+
+	operator CXData() {
+		return CXData(buffer,n);
+	}
 
 };
 

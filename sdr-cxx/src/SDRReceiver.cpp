@@ -15,9 +15,9 @@ namespace sdr {
 
 
 
-const unsigned long SDRReceiver::DECIMATION_FACTOR=32;
-const float SDRReceiver::AUDIO_RATE=4.8e4;
-const unsigned long SDRReceiver::AUDIO_BLOCK_SIZE = 64;
+const unsigned long SDRReceiver::DECIMATION_FACTOR=64;
+const float SDRReceiver::AUDIO_RATE=2.4e4;
+const unsigned long SDRReceiver::AUDIO_BLOCK_SIZE = 256;
 const float SDRReceiver::RF_RATE = SDRReceiver::AUDIO_RATE * (float)SDRReceiver::DECIMATION_FACTOR;
 const unsigned long SDRReceiver::RF_BLOCK_SIZE = SDRReceiver::AUDIO_BLOCK_SIZE * SDRReceiver::DECIMATION_FACTOR;
 
@@ -25,7 +25,7 @@ const unsigned long SDRReceiver::RF_BLOCK_SIZE = SDRReceiver::AUDIO_BLOCK_SIZE *
 SDRReceiver::SDRReceiver(const unsigned channel_,const float frequency_,
 		const float gain_) :
 		channel(channel_), bandwidth(-1), frequency(frequency_), rxGain(gain_), stream(nullptr),
-		decimator(DECIMATION_FACTOR,AUDIO_BLOCK_SIZE) {
+		decimator(200,100) {
 
 	rfBuffer = new cx_t[RF_BLOCK_SIZE];
 	audioBuffer = new cx_t[AUDIO_BLOCK_SIZE];
@@ -95,10 +95,7 @@ SDRData SDRReceiver::load() {
 	auto buffs = (void *const *)&rfBuffer;
 		int out=rx->readStream(stream,buffs,RF_BLOCK_SIZE,flags,ns);
 		if(out<0) throw SDRError(out,flags);
-		decimator(rfBuffer);
-		std::copy(decimator.begin(),decimator.end(),audioBuffer);
-
-	return SDRData(audioBuffer,AUDIO_BLOCK_SIZE,flags,ns);
+	return SDRData(rfBuffer,AUDIO_BLOCK_SIZE,flags,ns);
 }
 
 

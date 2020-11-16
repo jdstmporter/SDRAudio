@@ -8,37 +8,39 @@
 #ifndef SDRDECIMATOR_HPP_
 #define SDRDECIMATOR_HPP_
 
-#include <complex>
-#include <liquid/liquid.h>
+#include "base.hpp"
 
 namespace sdr {
 
 class SDRDecimator {
-private:
-	unsigned factor;
-	unsigned blockSize;
-	float attenuation;
-	unsigned delay;
-	std::complex<float> *outputs;
-	firdecim_crcf decimator;
 public:
-	using iterator = std::complex<float> *;
-	using const_iterator = const std::complex<float> *;
-	SDRDecimator(const unsigned factor_,const unsigned blockSize_,
-					const float attenuation_=60.0,const unsigned delay_=8);
-	SDRDecimator() : SDRDecimator(32,32) {};
+private:
+	float factor;
+	unsigned long long outF, inF;
+		kfr::samplerate_converter<float> decimatorR, decimatorI;
+		unsigned inBlock;
+		unsigned outBlock;
+
+	CXData inputs;
+	CXData outputs;
+
+public:
+	using size_t=CXData::size_t;
+	SDRDecimator(const unsigned long long outFrequency,const unsigned long long inFrequency,
+				 const unsigned blockSize=1024,
+				 const kfr::resample_quality quality=kfr::resample_quality::high);
+	SDRDecimator() : SDRDecimator(48000,96000) {};
 	virtual ~SDRDecimator();
 	SDRDecimator(SDRDecimator &&other) = default;
 	SDRDecimator(const SDRDecimator &other) = default;
 
 
-	std::complex<float> * operator()(std::complex<float> *inputs);
+	void operator()(const cx_t *in);
+	void operator()(const std::vector<cx_t> &in);
 
-	iterator begin() { return outputs; }
-	iterator end() { return outputs+blockSize; }
-	const_iterator begin() const { return outputs; }
-	const_iterator end() const { return outputs+blockSize; }
-	unsigned size() const { return blockSize; }
+	float operator[](const size_t idx) const { return outputs[idx]; }
+	unsigned outSize() const { return outputs.size(); }
+	unsigned inSize() const { return inBlock; }
 };
 
 } /* namespace sdr */
