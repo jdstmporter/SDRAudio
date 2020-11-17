@@ -13,7 +13,6 @@
 
 #include "SDRFlags.hpp"
 #include "SDRError.hpp"
-#include "SDRDecimator.hpp"
 
 namespace sdr {
 
@@ -54,29 +53,17 @@ struct SDRData {
 
 class SDRReceiver {
 private:
-
-
-	const static float RF_RATE;
-	const static unsigned long DECIMATOR_LENGTH;
-
-	const static unsigned long RF_BLOCK_SIZE;
 	unsigned channel;
 	float bandwidth;
 	float frequency;
 
 	float rxGain;
-	cx_t *rfBuffer;
-	cx_t *audioBuffer;
+	cx_t *buffer;
 	SoapySDR::Device *rx;
 	SoapySDR::Stream *stream;
-	SDRDecimator decimator;
 
 	void update();
 public:
-	const static unsigned long AUDIO_BLOCK_SIZE;
-	const static float AUDIO_RATE;
-	const static unsigned long DECIMATION_FACTOR;
-
 	SDRReceiver(const unsigned channel_=0,
 			    const float frequency_=433.0e6,
 				const float gain_ = 0.0);

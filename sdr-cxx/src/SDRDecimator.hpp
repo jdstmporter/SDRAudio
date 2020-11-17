@@ -25,8 +25,8 @@ private:
 	CXData outputs;
 
 public:
-	using size_t=CXData::size_t;
-	SDRDecimator(const unsigned long long outFrequency,const unsigned long long inFrequency,
+	SDRDecimator(const unsigned long long outFrequency,
+				 const unsigned long long inFrequency,
 				 const unsigned blockSize=1024,
 				 const kfr::resample_quality quality=kfr::resample_quality::high);
 	SDRDecimator() : SDRDecimator(48000,96000) {};
@@ -38,9 +38,15 @@ public:
 	void operator()(const cx_t *in);
 	void operator()(const std::vector<cx_t> &in);
 
-	float operator[](const size_t idx) const { return outputs[idx]; }
+	float operator[](const unsigned long long idx) const { return outputs[idx]; }
 	unsigned outSize() const { return outputs.size(); }
 	unsigned inSize() const { return inBlock; }
+
+	void copy(std::vector<float>::iterator it) {
+		for(auto i=0;i<2*outputs.size();i++) {
+			*it++ = outputs[i];
+		}
+	}
 };
 
 } /* namespace sdr */

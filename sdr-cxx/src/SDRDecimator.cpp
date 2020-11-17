@@ -9,15 +9,16 @@
 
 namespace sdr {
 
-SDRDecimator::SDRDecimator(const unsigned long long outFrequency,const unsigned long long inFrequency,
+SDRDecimator::SDRDecimator(const unsigned long long outFrequency,
+				 const unsigned long long inFrequency,
 				 const unsigned blockSize,
 				 const kfr::resample_quality quality) :
 						 factor(outFrequency/(float)inFrequency),
-						 outF(outFrequency), inF(inFrequency),
+						 inF(outFrequency), outF(inFrequency),
 						 decimatorR(kfr::resampler<float>(quality,outF,inF)),
 						 decimatorI(kfr::resampler<float>(quality,outF,inF)),
-						 inBlock(blockSize*std::ceil(factor)),
-						 				outBlock(blockSize),
+						 inBlock(blockSize),
+						 				outBlock(std::ceil(blockSize*factor)),
 						 				inputs(inBlock),
 						 				outputs(outBlock)
 										{}

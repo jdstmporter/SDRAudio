@@ -17,28 +17,45 @@
 #include <kfr/io.hpp>
 #include "SDRDecimator.hpp"
 
-const unsigned long factor = 32;
-const unsigned long long outFreq = 48000;
-constexpr unsigned long long inFreq = outFreq*factor;
-const float freq = 40000;
-constexpr float phaseFactor = 2*sdr::PI/(float)inFreq;
+
+//const unsigned long factor = 32;
+//const unsigned long long outFreq = 48000;
+//constexpr unsigned long long inFreq = outFreq*factor;
+//const float freq = 40000;
+//constexpr float phaseFactor = 2*sdr::PI/(float)inFreq;
 
 int main(const int argc,const char **argv) {
 	try {
-		//udio::AUAudio au;
-		//au.enumerate();
-		//for(auto it = au.begin();it != au.end(); it++) {
-		//	std::cout << *it << std::endl;
-		//}
-		//std::cout << "Default device has index " << audio::AUDevice().index() << std::endl;
+//		audio::AUAudio au;
+//		au.enumerate();
+//		for(auto it = au.begin();it != au.end(); it++) {
+//			std::cout << *it << std::endl;
+//		}
+//		std::cout << "Default device has index " << audio::AUDevice().index() << std::endl;
+//
+//		float centreFrequency = 1.518;
+//		float gain = 10.0;
+//		std::string filename="joe";
+//		try {
+//			centreFrequency = std::stof(argv[1])*1.0e6;
+//			gain = std::stof(argv[2]);
+//			filename = std::string(argv[3]);
+//		}
+//		catch(...) {
+//			std::cerr << "test <centre freq in MHz> <gain in dB> <filename>" << std::endl;
+//			return 1;
+//		}
 
-		//auto centreFrequency = std::stof(argv[1])*1.0e6;
-		//auto gain = std::stof(argv[2]);
-		//std::string filename(argv[3]);
+		unsigned long factor = 4;
+		unsigned long long outFreq = 48000;
+		unsigned long long inFreq = outFreq*factor;
+		float freq = 32000.f;
+		float phaseFactor = 2*sdr::PI/(float)inFreq;
 
 
 		std::cout << "Make decimator " << std::endl;
-		sdr::SDRDecimator decimator(48000,96000,1024);
+		sdr::SDRDecimator decimator(outFreq,inFreq,1024*factor);
+
 		std::cout << "Made decimator " << std::endl;
 
 		std::vector<sdr::cx_t> sine(1024*factor,sdr::cx_zero);
@@ -91,62 +108,55 @@ int main(const int argc,const char **argv) {
 		}
 
 
-/*
-
-		audio::AUNonBlockingStream stream;
 
 
-		auto centreFrequency = std::stof(argv[1])*1.0e6;
-		auto gain = std::stof(argv[2]);
-		std::string filename(argv[3]);
-		unsigned bufferSize=2*sdr::SDRReceiver::AUDIO_BLOCK_SIZE;
+//		audio::AUNonBlockingStream stream;
+//
+//
+//
+//		sdr::freq_t bufferSize=2*sdr::SDRConstants::AUDIO_BLOCK_SIZE;
+//
+//		wav::WAVFile wavfile(filename,wav::WAVFile::Mode::WRITE_ONLY,
+//							 (int)sdr::SDRConstants::AUDIO_RATE,1);
+//
+//		sdr::SDRReceiver rx(0,centreFrequency,gain);
+//		rx.connect();
+//
+//		std::vector<float> buffer(bufferSize,0);
+//
+//		sdr::SDRDecimator decimator;
+//
+//		sdr::SDRConstants::print();
+//
+//		//stream.start();
+//		//while(true) {
+//		for(auto i=0;i<10000;i++) {
+//			try {
+//				auto response = rx.load();
+//				decimator(response.buffer);
+//				decimator.copy(buffer.begin());
+//				wavfile.write(buffer);
+//				auto mima=std::minmax_element(buffer.begin(),buffer.end());
+//				std::cout << "  Min " << *mima.first << " Max " << *mima.second << std::endl;
+//			}
+//			catch(sdr::SDRError &e) {
+//				std::cerr << "Error : " << e.what() << std::endl;
+//			}
+//			catch(std::exception &e) {
+//				std::cerr << "Error : " << e.what() << std::endl;
+//			}
+//		}
+//		//stream.stop();
+//		//wavfile.flush();
+//
+//rx.disconnect();
 
-		wav::WAVFile wavfile(filename,wav::WAVFile::Mode::WRITE_ONLY,
-							 (int)sdr::SDRReceiver::AUDIO_RATE,1);
-
-		sdr::SDRReceiver rx(0,centreFrequency,10.0);
-		rx.connect();
-
-		std::vector<float> buffer(bufferSize,0);
-
-
-		//stream.start();
-		//while(true) {
-		for(auto i=0;i<10000;i++) {
-			try {
-				auto response = rx.load();
-				//std::cout << response << std::endl;
-				auto it=buffer.begin();
-				for(auto it2=response.begin();it2!=response.end();it2++) {
-					auto value=(*it2)*gain;
-					auto r = std::real(value);
-					auto i = std::imag(value);
-					*(it++)=r;
-					*(it++)=i;
-				}
-				//auto mima=std::minmax_element(buffer.begin(),buffer.end());
-				//std::cout << "Min " << *mima.first << " Max " << *mima.second << std::endl;
-				wavfile.write(buffer);
-				//stream.write(buffer);
-			}
-			catch(sdr::SDRError &e) {
-				std::cerr << "Error : " << e.what() << std::endl;
-			}
-			catch(std::exception &e) {
-				std::cerr << "Error : " << e.what() << std::endl;
-			}
-		}
-		stream.stop();
-		//wavfile.flush();
-
-rx.disconnect();
-		 */
 
 	}
 	catch(std::exception &e) {
 		std::cerr << "Unexpected error: " << e.what() << std::endl;
 	}
-
+return 0;
 }
 
 

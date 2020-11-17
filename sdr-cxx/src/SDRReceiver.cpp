@@ -15,29 +15,20 @@ namespace sdr {
 
 
 
-const unsigned long SDRReceiver::DECIMATION_FACTOR=64;
-const float SDRReceiver::AUDIO_RATE=2.4e4;
-const unsigned long SDRReceiver::AUDIO_BLOCK_SIZE = 256;
-const float SDRReceiver::RF_RATE = SDRReceiver::AUDIO_RATE * (float)SDRReceiver::DECIMATION_FACTOR;
-const unsigned long SDRReceiver::RF_BLOCK_SIZE = SDRReceiver::AUDIO_BLOCK_SIZE * SDRReceiver::DECIMATION_FACTOR;
-
 
 SDRReceiver::SDRReceiver(const unsigned channel_,const float frequency_,
 		const float gain_) :
-		channel(channel_), bandwidth(-1), frequency(frequency_), rxGain(gain_), stream(nullptr),
-		decimator(200,100) {
+		channel(channel_), bandwidth(-1), frequency(frequency_), rxGain(gain_), stream(nullptr) {
 
-	rfBuffer = new cx_t[RF_BLOCK_SIZE];
-	audioBuffer = new cx_t[AUDIO_BLOCK_SIZE];
+	buffer = new cx_t[SDRConstants::RF_BLOCK_SIZE];
 
 	rx = SoapySDR::Device::make("driver=rtlsdr");
-	rx->setSampleRate(SOAPY_SDR_RX,channel,RF_RATE);
+	rx->setSampleRate(SOAPY_SDR_RX,channel,SDRConstants::RF_RATE);
 	this->update();
 }
 
 SDRReceiver::~SDRReceiver() {
-	if(rfBuffer) delete[] rfBuffer;
-	if(audioBuffer) delete[] audioBuffer;
+	if(buffer != nullptr) delete[] buffer;
 	if(rx != nullptr) {
 		if(stream != nullptr) {
 			rx->deactivateStream(stream);
@@ -92,10 +83,10 @@ SDRData SDRReceiver::load() {
 	long long ns;
 
 	//void *const* buffs = &(void *)buffer;
-	auto buffs = (void *const *)&rfBuffer;
-		int out=rx->readStream(stream,buffs,RF_BLOCK_SIZE,flags,ns);
+	auto buffs = (void *const *)&buffer;
+		int out=rx->readStream(stream,buffs,SDRConstants::RF_BLOCK_SIZE,flags,ns);
 		if(out<0) throw SDRError(out,flags);
-	return SDRData(rfBuffer,AUDIO_BLOCK_SIZE,flags,ns);
+	return SDRData(buffer,SDRConstants::RF_BLOCK_SIZE,flags,ns);
 }
 
 

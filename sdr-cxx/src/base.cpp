@@ -22,7 +22,7 @@ cx_t r2cx(const float f) noexcept { return cx_t(f,0); }
 CXData::CXData(const std::vector<cx_t> &inputs) :
 					CXData(inputs.data(),inputs.size()) {}
 
-CXData::CXData(const cx_t *inputs,const size_t n_) :
+CXData::CXData(const cx_t *inputs,const freq_t n_) :
 				CXData(n_) {
 	auto itr=real.begin();
 	auto iti=imag.begin();
@@ -49,12 +49,13 @@ void CXData::load(const std::vector<cx_t> &inputs) {
 	load(inputs.data());
 }
 
-float CXData::operator[](const size_t idx) const {
+float CXData::operator[](const freq_t idx) const {
 	auto pos=idx/2;
 	if((idx & 1)==0) return real[pos];
 	else return imag[pos];
 }
 
+/*
 float CXData::iterator::at() const {
 	if((offset & 1)==0) return *reals;
 	else return *imags;
@@ -80,5 +81,6 @@ CXData::iterator & CXData::iterator::operator++(int) {
 	++offset;
 	return o;
 }
+*/
 
 }
