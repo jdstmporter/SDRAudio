@@ -54,7 +54,7 @@ int main(const int argc,const char **argv) {
 
 
 		std::cout << "Make decimator " << std::endl;
-		sdr::SDRDecimator decimator(outFreq,inFreq,1024*factor);
+		sdr::SDRDecimator decimator(inFreq,1024*factor,factor);
 
 		std::cout << "Made decimator " << std::endl;
 

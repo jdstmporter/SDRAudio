@@ -16,7 +16,7 @@ class SDRDecimator {
 public:
 private:
 	float factor;
-	unsigned long long outF, inF;
+	unsigned long long inF, outF;
 		kfr::samplerate_converter<float> decimatorR, decimatorI;
 		unsigned inBlock;
 		unsigned outBlock;
@@ -25,11 +25,11 @@ private:
 	CXData outputs;
 
 public:
-	SDRDecimator(const unsigned long long outFrequency,
-				 const unsigned long long inFrequency,
-				 const unsigned blockSize=1024,
+	SDRDecimator(const unsigned long long inFrequency,
+				 const unsigned long blockSize,
+				 const unsigned long factor,
 				 const kfr::resample_quality quality=kfr::resample_quality::high);
-	SDRDecimator() : SDRDecimator(48000,96000) {};
+	SDRDecimator() : SDRDecimator(96000,2048,2) {};
 	virtual ~SDRDecimator();
 	SDRDecimator(SDRDecimator &&other) = default;
 	SDRDecimator(const SDRDecimator &other) = default;
