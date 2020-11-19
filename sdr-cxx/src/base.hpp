@@ -57,7 +57,7 @@ struct CXData {
 
 	CXData(const std::vector<cx_t> &inputs);
 	CXData(const cx_t *inputs,const freq_t n_);
-	CXData(const freq_t n_) : n(n_), real(n,0), imag(n,0) {};
+	CXData(const size_t n_) : n(n_), real(n,0), imag(n,0) {};
 	CXData(const CXData &) = default;
 	CXData & operator=(const CXData &) = default;
 	virtual ~CXData() = default;
@@ -70,6 +70,11 @@ struct CXData {
 	vec_t::iterator beginI() { return imag.begin(); }
 	vec_t::iterator endR() { return real.end(); }
 	vec_t::iterator endI() { return imag.end(); }
+
+	void set(const unsigned long offset,const cx_t c) {
+		real[offset]=std::real(c);
+		imag[offset]=std::imag(c);
+	}
 
 	//iterator begin() { return iterator(*this); }
 	//iterator end() { return iterator(*this,n); }

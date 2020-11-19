@@ -8,7 +8,7 @@
 #ifndef WAVFILE_HPP_
 #define WAVFILE_HPP_
 
-#include <sndfile.hh>
+#include <sndfile.h>
 #include <string>
 #include <sstream>
 #include <exception>

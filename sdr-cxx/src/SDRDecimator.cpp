@@ -9,44 +9,44 @@
 
 namespace sdr {
 
+void SDRSimpleDecimator::operator()(const std::complex<float> *in) {
+	for(unsigned i=0;i<outBlock;i++) outputs.set(i,in[i*factor]);
+}
+
+void SDRSimpleLPFDecimator::operator()(const std::complex<float> *in) {
+
+	for(unsigned i=0;i<outBlock;i++) {
+		float mean=0;
+		auto offset=i*factor;
+		for(unsigned j=0;i<factor;j++) mean+=in[offset+j];
+		outputs.set(i,mean/(float)factor);
+	}
+}
+
 SDRDecimator::SDRDecimator(
-				 const unsigned long long inFrequency,
+				 const float inFrequency,
 				 const unsigned long blockSize,
 				 const unsigned long factor_,
 				 const kfr::resample_quality quality) :
-						 factor(factor_),
-						 inF(inFrequency), outF(inFrequency/factor),
-						 decimatorR(kfr::resampler<float>(quality,outF,inF)),
-						 decimatorI(kfr::resampler<float>(quality,outF,inF)),
-						 inBlock(blockSize),
-						 outBlock(std::ceil(blockSize/factor)),
-						 inputs(inBlock),
-						 outputs(outBlock)
-										{}
+		SDRDecimatorBase(inFrequency,blockSize,factor_),
+		decimatorR(kfr::resampler<float>(quality,(size_t)outF,(size_t)inF)),
+		decimatorI(kfr::resampler<float>(quality,(size_t)outF,(size_t)inF)) {};
+
+SDRDecimator::SDRDecimator(const float inFrequency,
+				 const float outFrequency,
+				 const unsigned long blockSize,
+				 const kfr::resample_quality quality) :
+		SDRDecimatorBase(inFrequency,outFrequency,blockSize),
+		decimatorR(kfr::resampler<float>(quality,(size_t)outF,(size_t)inF)),
+		decimatorI(kfr::resampler<float>(quality,(size_t)outF,(size_t)inF)) {};
 
 
 
-SDRDecimator::~SDRDecimator() {
-
-
-}
 
 void SDRDecimator::operator()(const std::complex<float> *in) {
-
-	std::cout << "    DEC Outblock = " << outBlock << " Inblock = " << inBlock  << std::endl;
 	inputs.load(in);
-	std::cout << "     DEC Decimating" << std::endl;
-	for(unsigned i=0;i<outBlock;i++) {
-		outputs.real[i]=inputs.real[i*factor];
-		outputs.imag[i]=inputs.imag[i*factor];
-	}
-	//decimatorR.process(outputs.real,inputs.real);
-	//decimatorI.process(outputs.imag,inputs.imag);
-	std::cout << "     DEC Completed" << std::endl;
-}
-
-void SDRDecimator::operator()(const std::vector<cx_t> &in) {
-	(*this)(in.data());
+	decimatorR.process(outputs.real,inputs.real);
+	decimatorI.process(outputs.imag,inputs.imag);
 }
 
 

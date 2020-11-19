@@ -29,6 +29,9 @@ LDFLAGS := $(LIB_INFO)
 APP := test
 OBJ := $(call makeObjs,$(SRCDIR))
 
+run: $(APP)
+	./$(APP)
+
 .PHONY: app
 app: 	$(APP)
 
