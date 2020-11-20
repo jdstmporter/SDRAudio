@@ -30,7 +30,7 @@ APP := test
 OBJ := $(call makeObjs,$(SRCDIR))
 
 run: $(APP)
-	./$(APP)
+	./$(APP) 1.518
 
 .PHONY: app
 app: 	$(APP)

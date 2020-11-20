@@ -16,14 +16,15 @@ namespace sdr {
 
 
 
-SDRReceiver::SDRReceiver(const unsigned channel_,const float frequency_,
+SDRReceiver::SDRReceiver(const size_t bufferSize_,const float rate_,const unsigned channel_,const float frequency_,
 		const float gain_) :
+		bufferSize(bufferSize_),rate(rate_),
 		channel(channel_), bandwidth(-1), frequency(frequency_), rxGain(gain_), stream(nullptr) {
 
-	buffer = new cx_t[SDRConstants::RF_BLOCK_SIZE];
+	buffer = new cx_t[bufferSize];
 
 	rx = SoapySDR::Device::make("driver=rtlsdr");
-	rx->setSampleRate(SOAPY_SDR_RX,channel,SDRConstants::RF_RATE);
+	rx->setSampleRate(SOAPY_SDR_RX,channel,rate);
 	this->update();
 }
 
@@ -84,9 +85,9 @@ SDRData SDRReceiver::load() {
 
 	//void *const* buffs = &(void *)buffer;
 	auto buffs = (void *const *)&buffer;
-		int out=rx->readStream(stream,buffs,SDRConstants::RF_BLOCK_SIZE,flags,ns);
+		int out=rx->readStream(stream,buffs,bufferSize,flags,ns);
 		if(out<0) throw SDRError(out,flags);
-	return SDRData(buffer,SDRConstants::RF_BLOCK_SIZE,flags,ns);
+	return SDRData(buffer,bufferSize,flags,ns);
 }
 
 

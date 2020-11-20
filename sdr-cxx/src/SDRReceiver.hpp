@@ -53,18 +53,23 @@ struct SDRData {
 
 class SDRReceiver {
 private:
+	size_t bufferSize;
+	float rate;
 	unsigned channel;
 	float bandwidth;
 	float frequency;
 
 	float rxGain;
+
 	cx_t *buffer;
 	SoapySDR::Device *rx;
 	SoapySDR::Stream *stream;
 
 	void update();
 public:
-	SDRReceiver(const unsigned channel_=0,
+	SDRReceiver(const size_t bufferSize_ = 32768,
+				const float rate = 1536000.f,
+				const unsigned channel_=0,
 			    const float frequency_=433.0e6,
 				const float gain_ = 0.0);
 	virtual ~SDRReceiver();

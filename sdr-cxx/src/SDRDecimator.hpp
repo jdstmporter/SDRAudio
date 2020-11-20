@@ -83,23 +83,26 @@ public:
 		SDRDecimatorBase(inFrequency,outFrequency,blockSize) {};
 	virtual ~SDRSimpleDecimator() = default;
 
-	virtual void operator()(const cx_t *in) {};
+	virtual void operator()(const cx_t *in);
 };
 
 class SDRSimpleLPFDecimator : public SDRDecimatorBase {
 
+private:
+	std::vector<float> coeffts;
+
+	void makeFilter();
+
 public:
 	SDRSimpleLPFDecimator(const float inFrequency,
 				 const unsigned long blockSize,
-				 const unsigned long factor_) :
-		SDRDecimatorBase(inFrequency,blockSize,factor_) {};
+				 const unsigned long factor_);
 	SDRSimpleLPFDecimator(const float inFrequency,
 				 const float outFrequency,
-				 const unsigned long blockSize) :
-		SDRDecimatorBase(inFrequency,outFrequency,blockSize) {};
+				 const unsigned long blockSize);
 	virtual ~SDRSimpleLPFDecimator() = default;
 
-	virtual void operator()(const cx_t *in) {};
+	virtual void operator()(const cx_t *in);
 };
 
 class SDRDecimator : public SDRDecimatorBase {
